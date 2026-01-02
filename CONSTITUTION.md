@@ -1,6 +1,61 @@
+<!--
+SYNC IMPACT REPORT
+==================
+Amendment Date: 2026-01-02
+Version Change: 1.0.0 → 1.1.0 (MINOR - Phase II technology additions)
+
+Modified Sections:
+- Article III, Section 3.1: Phase Definitions updated
+  * Phase I: Changed to "in-memory only (no persistence)" (was "local SQLite")
+  * Phase II: Changed to "Full-Stack Web App | Python REST API, Neon PostgreSQL, Next.js frontend, Better Auth" (was "API Layer | FastAPI backend, Neon PostgreSQL, REST API")
+  * Phase IV: Changed to "Advanced Features" (was "Frontend | Next.js web application, user authentication")
+  * Phase V: Added "AI orchestration" to scope
+
+- Article IV, Section 4.1: Mandatory Technologies updated
+  * Backend Framework: Changed from "FastAPI" to "Python REST API (framework TBD)" for Phase II–V
+  * ORM: Changed from "SQLModel | All" to "SQLModel or equivalent | II–V"
+  * Database: Split into two rows - Phase I (None/in-memory) and Phase II–V (Neon Serverless PostgreSQL)
+  * Frontend: Changed from "Next.js | IV–V" to "Next.js (React, TypeScript) | II–V"
+  * Authentication: Added new row "Better Auth (signup/signin) | II–V"
+
+- Article IV, Section 4.2: Technology Prohibitions updated
+  * Removed prohibitions on alternative ORMs and web frameworks (now flexible)
+  * Added: "AI frameworks, agent frameworks, or orchestration tools before Phase III"
+  * Added: "Authentication systems other than Better Auth (Phase II+)"
+  * Added: "Databases or persistence layers in Phase I (in-memory only)"
+
+- Article IV, Section 4.4: Version Requirements updated
+  * Removed FastAPI minimum version requirement
+  * Changed SQLModel to "SQLModel or equivalent ORM"
+  * Added TypeScript 5.0+ requirement
+  * Added Better Auth latest stable version requirement
+
+Added Sections:
+- None
+
+Removed Sections:
+- None
+
+Templates Requiring Updates:
+⚠ PENDING: .specify/templates/plan-template.md - Review constitution alignment
+⚠ PENDING: .specify/templates/spec-template.md - Review phase technology constraints
+⚠ PENDING: .specify/templates/tasks-template.md - Review task categorization for Phase II
+
+Follow-up TODOs:
+- Review all Phase II specifications for compliance with new technology matrix
+- Update any existing Phase I specs to clarify "in-memory only" constraint
+- Ensure Better Auth is specified for all Phase II+ features requiring authentication
+
+Rationale for MINOR version bump:
+This amendment adds new technology capabilities for Phase II (Next.js frontend, Better Auth,
+Neon PostgreSQL) and clarifies phase boundaries. It does not remove or fundamentally redefine
+existing principles, nor does it break backward compatibility with Phase I specifications.
+The changes are additive and clarifying, warranting a MINOR version increment.
+-->
+
 # Evolution of Todo — Global Constitution
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Effective:** All Phases (I–V)
 **Authority:** This constitution governs all development activities across the entire Evolution of Todo project.
 
@@ -129,11 +184,11 @@ Work without declaration is prohibited.
 
 | Phase | Name | Scope |
 |-------|------|-------|
-| I | Foundation | CLI todo app, single-user, local SQLite |
-| II | API Layer | FastAPI backend, Neon PostgreSQL, REST API |
+| I | Foundation | CLI todo app, single-user, in-memory only (no persistence) |
+| II | Full-Stack Web App | Python REST API, Neon PostgreSQL, Next.js frontend, Better Auth |
 | III | Agent Integration | OpenAI Agents SDK, MCP, agent-driven operations |
-| IV | Frontend | Next.js web application, user authentication |
-| V | Scale | Docker, Kubernetes, Kafka, Dapr, multi-tenant |
+| IV | Advanced Features | Additional capabilities built on Phase II foundation |
+| V | Scale | Docker, Kubernetes, Kafka, Dapr, multi-tenant, AI orchestration |
 
 ### Section 3.2 — Phase Isolation
 
@@ -178,11 +233,12 @@ The following technologies are mandatory for their respective domains:
 | Domain | Technology | Phases |
 |--------|------------|--------|
 | Backend Language | Python 3.11+ | All |
-| Backend Framework | FastAPI | II–V |
-| ORM | SQLModel | All |
-| Database (Dev) | SQLite | I |
-| Database (Prod) | Neon PostgreSQL | II–V |
-| Frontend Framework | Next.js | IV–V |
+| Backend Framework | Python REST API (framework TBD) | II–V |
+| ORM/Data Layer | SQLModel or equivalent | II–V |
+| Database | None (in-memory only) | I |
+| Database | Neon Serverless PostgreSQL | II–V |
+| Frontend Framework | Next.js (React, TypeScript) | II–V |
+| Authentication | Better Auth (signup/signin) | II–V |
 | Agent SDK | OpenAI Agents SDK | III–V |
 | Tool Protocol | MCP (Model Context Protocol) | III–V |
 | Containerization | Docker | V |
@@ -194,11 +250,12 @@ The following technologies are mandatory for their respective domains:
 
 The following are prohibited without explicit specification approval:
 
-- Alternative ORMs (SQLAlchemy direct, Django ORM, etc.)
-- Alternative web frameworks (Flask, Django, etc.)
-- Alternative frontend frameworks (React without Next.js, Vue, Angular, etc.)
+- Alternative frontend frameworks (Vue, Angular, React without Next.js, etc.)
 - NoSQL databases as primary storage
 - GraphQL (unless specified)
+- AI frameworks, agent frameworks, or orchestration tools before Phase III
+- Authentication systems other than Better Auth (Phase II+)
+- Databases or persistence layers in Phase I (in-memory only)
 
 ### Section 4.3 — Dependency Management
 
@@ -214,10 +271,11 @@ All dependencies must be:
 Minimum versions required:
 
 - Python: 3.11
-- FastAPI: 0.100+
-- SQLModel: 0.0.14+
+- SQLModel: 0.0.14+ (or equivalent ORM)
 - Next.js: 14+
 - Node.js: 20+ (for frontend)
+- TypeScript: 5.0+ (for frontend)
+- Better Auth: Latest stable version
 
 ---
 
@@ -411,8 +469,9 @@ When facing ambiguity:
 This constitution is effective upon creation and governs all work on the Evolution of Todo project.
 
 **Established:** 2025-12-28
+**Last Amended:** 2026-01-02
 **Authority:** Project Owner
-**Version:** 1.0.0
+**Version:** 1.1.0
 
 ---
 

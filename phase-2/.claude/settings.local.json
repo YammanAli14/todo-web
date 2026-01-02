@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch:*)",
+      "Bash(ls:*)",
+      "Bash(pwsh:*)",
+      "Bash(git checkout:*)",
+      "Bash(python -m pip install:*)",
+      "Bash(venv/Scripts/pip install:*)",
+      "Bash(venv/Scripts/alembic upgrade:*)",
+      "Bash(venv/Scripts/uvicorn:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}

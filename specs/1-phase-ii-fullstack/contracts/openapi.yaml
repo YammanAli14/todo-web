@@ -1,0 +1,619 @@
+openapi: 3.1.0
+info:
+  title: Todo API
+  description: RESTful API for Phase II Full-Stack Todo Application
+  version: 1.0.0
+  contact:
+    name: Evolution of Todo Project
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.todo-app.example.com
+    description: Production server (placeholder)
+
+tags:
+  - name: Authentication
+    description: User registration and authentication operations
+  - name: Todos
+    description: Todo CRUD operations
+
+paths:
+  # ==================== Authentication Endpoints ====================
+
+  /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Create a new user account with email and password
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+            examples:
+              validSignup:
+                summary: Valid signup request
+                value:
+                  email: "user@example.com"
+                  password: "SecurePassword123"
+      responses:
+        '201':
+          description: User successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                success:
+                  value:
+                    user:
+                      id: 1
+                      email: "user@example.com"
+                      created_at: "2026-01-02T10:30:00Z"
+                      updated_at: "2026-01-02T10:30:00Z"
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '400':
+          description: Invalid input (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidEmail:
+                  value:
+                    detail: "Invalid email format"
+                    code: "INVALID_EMAIL"
+                weakPassword:
+                  value:
+                    detail: "Password must be at least 8 characters"
+                    code: "WEAK_PASSWORD"
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                duplicate:
+                  value:
+                    detail: "Email already registered"
+                    code: "EMAIL_EXISTS"
+
+  /auth/signin:
+    post:
+      tags:
+        - Authentication
+      summary: Sign in to an existing account
+      description: Authenticate with email and password to receive a session token
+      operationId: signin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SigninRequest'
+            examples:
+              validSignin:
+                value:
+                  email: "user@example.com"
+                  password: "SecurePassword123"
+      responses:
+        '200':
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidCredentials:
+                  value:
+                    detail: "Invalid email or password"
+                    code: "INVALID_CREDENTIALS"
+
+  /auth/signout:
+    post:
+      tags:
+        - Authentication
+      summary: Sign out and end session
+      description: Invalidate the current user session
+      operationId: signout
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successfully signed out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Successfully signed out"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user profile
+      description: Retrieve the authenticated user's profile information
+      operationId: getCurrentUser
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ==================== Todo Endpoints ====================
+
+  /todos:
+    get:
+      tags:
+        - Todos
+      summary: Get all todos for authenticated user
+      description: Retrieve all todos belonging to the authenticated user
+      operationId: getTodos
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of todos retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TodoResponse'
+              examples:
+                withTodos:
+                  summary: User with todos
+                  value:
+                    - id: 1
+                      title: "Buy groceries"
+                      is_complete: false
+                      created_at: "2026-01-02T10:30:00Z"
+                      updated_at: "2026-01-02T10:30:00Z"
+                    - id: 2
+                      title: "Walk the dog"
+                      is_complete: true
+                      created_at: "2026-01-02T11:00:00Z"
+                      updated_at: "2026-01-02T12:00:00Z"
+                emptyList:
+                  summary: User with no todos
+                  value: []
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      tags:
+        - Todos
+      summary: Create a new todo
+      description: Create a new todo for the authenticated user
+      operationId: createTodo
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoCreateRequest'
+            examples:
+              validTodo:
+                value:
+                  title: "Buy groceries"
+      responses:
+        '201':
+          description: Todo created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+              examples:
+                created:
+                  value:
+                    id: 1
+                    title: "Buy groceries"
+                    is_complete: false
+                    created_at: "2026-01-02T10:30:00Z"
+                    updated_at: "2026-01-02T10:30:00Z"
+        '400':
+          description: Invalid input (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                emptyTitle:
+                  value:
+                    detail: "Title cannot be empty"
+                    code: "INVALID_TITLE"
+                    field: "title"
+                titleTooLong:
+                  value:
+                    detail: "Title must be 200 characters or less"
+                    code: "TITLE_TOO_LONG"
+                    field: "title"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /todos/{todoId}:
+    get:
+      tags:
+        - Todos
+      summary: Get a single todo by ID
+      description: Retrieve a specific todo belonging to the authenticated user
+      operationId: getTodo
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: todoId
+          in: path
+          required: true
+          description: ID of the todo to retrieve
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Todo retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags:
+        - Todos
+      summary: Update a todo's title
+      description: Update the title of an existing todo belonging to the authenticated user
+      operationId: updateTodo
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: todoId
+          in: path
+          required: true
+          description: ID of the todo to update
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoUpdateRequest'
+            examples:
+              validUpdate:
+                value:
+                  title: "Buy almond milk"
+      responses:
+        '200':
+          description: Todo updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+        '400':
+          description: Invalid input (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - Todos
+      summary: Delete a todo
+      description: Permanently delete a todo belonging to the authenticated user
+      operationId: deleteTodo
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: todoId
+          in: path
+          required: true
+          description: ID of the todo to delete
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '204':
+          description: Todo deleted successfully (no content returned)
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /todos/{todoId}/toggle:
+    patch:
+      tags:
+        - Todos
+      summary: Toggle todo completion status
+      description: Toggle a todo between complete and incomplete status
+      operationId: toggleTodo
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: todoId
+          in: path
+          required: true
+          description: ID of the todo to toggle
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Todo toggled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodoResponse'
+              examples:
+                toggledComplete:
+                  summary: Todo marked as complete
+                  value:
+                    id: 1
+                    title: "Buy groceries"
+                    is_complete: true
+                    created_at: "2026-01-02T10:30:00Z"
+                    updated_at: "2026-01-02T14:00:00Z"
+                toggledIncomplete:
+                  summary: Todo marked as incomplete
+                  value:
+                    id: 1
+                    title: "Buy groceries"
+                    is_complete: false
+                    created_at: "2026-01-02T10:30:00Z"
+                    updated_at: "2026-01-02T15:00:00Z"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+# ==================== Components ====================
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Better Auth session token
+
+  schemas:
+    # ========== Request Schemas ==========
+
+    SignupRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          example: "user@example.com"
+          description: User's email address (must be unique)
+        password:
+          type: string
+          minLength: 8
+          maxLength: 255
+          example: "SecurePassword123"
+          description: User's password (minimum 8 characters)
+
+    SigninRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          example: "SecurePassword123"
+
+    TodoCreateRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: "Buy groceries"
+          description: Todo task description
+
+    TodoUpdateRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: "Buy almond milk"
+          description: Updated todo task description
+
+    # ========== Response Schemas ==========
+
+    UserResponse:
+      type: object
+      required:
+        - id
+        - email
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+          description: User's email address
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-01-02T10:30:00Z"
+          description: ISO 8601 timestamp of account creation
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-01-02T10:30:00Z"
+          description: ISO 8601 timestamp of last update
+
+    AuthResponse:
+      type: object
+      required:
+        - user
+        - token
+      properties:
+        user:
+          $ref: '#/components/schemas/UserResponse'
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          description: Better Auth session token (store securely)
+
+    TodoResponse:
+      type: object
+      required:
+        - id
+        - title
+        - is_complete
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: Unique todo identifier
+        title:
+          type: string
+          maxLength: 200
+          example: "Buy groceries"
+          description: Todo task description
+        is_complete:
+          type: boolean
+          example: false
+          description: Completion status (true = complete, false = incomplete)
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-01-02T10:30:00Z"
+          description: ISO 8601 timestamp of todo creation
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-01-02T10:30:00Z"
+          description: ISO 8601 timestamp of last update
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+          example: "Invalid email format"
+          description: Human-readable error message
+        code:
+          type: string
+          example: "INVALID_EMAIL"
+          description: Machine-readable error code
+        field:
+          type: string
+          example: "email"
+          description: Field name for validation errors (optional)
+
+  # ========== Reusable Responses ==========
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required or session expired
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            notAuthenticated:
+              value:
+                detail: "Authentication required"
+                code: "UNAUTHORIZED"
+            sessionExpired:
+              value:
+                detail: "Session expired, please sign in again"
+                code: "SESSION_EXPIRED"
+
+    ForbiddenError:
+      description: User does not have permission to access this resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            notOwner:
+              value:
+                detail: "Forbidden: You don't own this todo"
+                code: "FORBIDDEN"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            todoNotFound:
+              value:
+                detail: "Todo not found"
+                code: "TODO_NOT_FOUND"
+
+security:
+  - BearerAuth: []

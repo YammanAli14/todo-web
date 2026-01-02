@@ -7,7 +7,9 @@
       "Bash(python main.py:*)",
       "Bash(python:*)",
       "Bash(git add:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
